@@ -9,21 +9,28 @@ import {
 } from './definitions';
 import { formatCurrency } from './utils';
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+// const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 export async function fetchRevenue() {
   try {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
 
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    console.log('Fetching revenue data...');
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
-    const data = await sql<Revenue[]>`SELECT * FROM revenue`;
+    // const data = await sql<Revenue[]>`SELECT * FROM revenue`;
 
-    // console.log('Data fetch completed after 3 seconds.');
-
-    return data;
+    return [
+      { month: 'Jan', revenue: 1000 },
+      { month: 'Feb', revenue: 2000 },
+      { month: 'Mar', revenue: 3000 },
+      { month: 'Apr', revenue: 4000 },
+      { month: 'May', revenue: 5000 },
+      { month: 'Jun', revenue: 6000 },
+      { month: 'Jul', revenue: 7000 },
+      { month: 'Aug', revenue: 8000 },
+    ];
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch revenue data.');
@@ -32,18 +39,33 @@ export async function fetchRevenue() {
 
 export async function fetchLatestInvoices() {
   try {
-    const data = await sql<LatestInvoiceRaw[]>`
-      SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
-      FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
-      ORDER BY invoices.date DESC
-      LIMIT 5`;
+    // const data = await sql<LatestInvoiceRaw[]>`
+    //   SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
+    //   FROM invoices
+    //   JOIN customers ON invoices.customer_id = customers.id
+    //   ORDER BY invoices.date DESC
+    //   LIMIT 5`;
 
-    const latestInvoices = data.map((invoice) => ({
-      ...invoice,
-      amount: formatCurrency(invoice.amount),
-    }));
-    return latestInvoices;
+    // const latestInvoices = data.map((invoice) => ({
+    //   ...invoice,
+    //   amount: formatCurrency(invoice.amount),
+    // }));
+    const response = await fetch("https://pokeapi.co/api/v2/pokemon");
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    console.log('Data fetched:', data);
+
+    console.log('Data fetch completed after 3 seconds.');
+
+    return data.results;
+
+    // return [
+    //   { amount: 'Amount', name: 'Amy Burns', image_url: '/customers/amy-burns.png', email: 'amy-burns@gmail.com', id: "1" },
+    //   { amount: 'Amount', name: 'Balazs Orban', image_url: '/customers/balazs-orban.png', email: 'balazs-orban@gmail.com', id: "2" },
+    //   { amount: 'Amount', name: 'Delba de Oliveira', image_url: '/customers/delba-de-oliveira.png', email: 'delba-de-oliveira@gmail.com', id: "3" },
+    // ];
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch the latest invoices.');
